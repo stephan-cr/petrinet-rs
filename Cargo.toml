@@ -1,0 +1,9 @@
+[package]
+name = "petrinet"
+version = "0.1.0"
+authors = ["Stephan Creutz <stephan.cr@gmx.de>"]
+edition = "2018"
+
+
+[dependencies]
+rand = "0.7"
