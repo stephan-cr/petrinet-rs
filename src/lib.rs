@@ -136,14 +136,15 @@ impl<'a> Petrinet<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rand::seq::SliceRandom;
 
     #[test]
     fn it_works() {
-        let mut place = super::Place::new(1, "a");
-        let mut arc = super::Arc::new(&mut place, 1).expect("weight greater than zero");
+        let place = super::Place::new(1, "a");
+        let arc = super::Arc::new(&place, 1).expect("weight greater than zero");
 
         let mut transition = super::Transition::new();
-        transition.add_input(&mut arc);
+        transition.add_input(&arc);
 
         transition.fire();
     }
@@ -257,12 +258,20 @@ mod tests {
         let x = between.sample(&mut rng);
 
         assert!(x >= 0 && x < 10);
+
+        let mut v = vec![1, 2, 3, 4];
+        v.shuffle(&mut rng);
+
+        let mut count = 0;
+        for _v in v.choose_multiple(&mut rng, v.len()) {
+            count += 1;
+        }
+        assert_eq!(4, count);
     }
 
     // https://en.wikipedia.org/wiki/Petri_net#/media/File:Detailed_petri_net.png
     #[test]
     fn test_more_complex_petrinet() {
-        //todo!("try RefCell");
         let p1 = super::Place::new(1, "P1");
         let p2 = super::Place::new(0, "P2");
         let p3 = super::Place::new(2, "P3");
