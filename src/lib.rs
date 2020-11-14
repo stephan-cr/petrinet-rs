@@ -133,6 +133,24 @@ impl<'a> Petrinet<'a> {
     }
 }
 
+pub struct RandomTransitionScheduler {}
+
+impl RandomTransitionScheduler {
+    pub fn new() -> Self {
+        Self {}
+    }
+
+    pub fn schedule(&mut self, transitions: &[Transition<'_>]) {
+        todo!("implement schedule");
+    }
+}
+
+impl Default for RandomTransitionScheduler {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -267,6 +285,33 @@ mod tests {
             count += 1;
         }
         assert_eq!(4, count);
+    }
+
+    #[test]
+    fn test_petrinet() {
+        let p1 = super::Place::new(2, "P1");
+        let p2 = super::Place::new(2, "P2");
+
+        let p3 = super::Place::new(0, "P3");
+
+        let a1 = super::Arc::new(&p1, 2).expect("weight greater than zero");
+        let a2 = super::Arc::new(&p2, 1).expect("weight greater than zero");
+
+        let a3 = super::Arc::new(&p3, 2).expect("weight greater than zero");
+
+        let mut t = super::Transition::new();
+        t.add_input(&a1);
+        t.add_input(&a2);
+
+        t.add_output(&a3);
+
+        let mut net = super::Petrinet::new();
+
+        net.add_transition(t);
+
+        net.step();
+
+        net.step();
     }
 
     // https://en.wikipedia.org/wiki/Petri_net#/media/File:Detailed_petri_net.png
