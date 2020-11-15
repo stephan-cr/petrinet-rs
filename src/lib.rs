@@ -137,7 +137,7 @@ impl<'a> Petrinet<'a> {
 }
 
 pub trait Scheduler {
-    fn schedule<'a>(&mut self, transitions: &'a [&Transition<'a>]) -> Option<&&Transition<'a>>;
+    fn schedule<'a>(&mut self, transitions: &'a [&Transition<'a>]) -> Option<&Transition<'a>>;
 }
 
 /// Choose a random transition firing order.
@@ -158,8 +158,8 @@ impl Default for RandomTransitionScheduler<rand::rngs::ThreadRng> {
 }
 
 impl<R: Rng> Scheduler for RandomTransitionScheduler<R> {
-    fn schedule<'a>(&mut self, transitions: &'a [&Transition<'a>]) -> Option<&&Transition<'a>> {
-        transitions.choose(&mut self.rng)
+    fn schedule<'a>(&mut self, transitions: &'a [&Transition<'a>]) -> Option<&Transition<'a>> {
+        transitions.choose(&mut self.rng).copied()
     }
 }
 
@@ -179,7 +179,7 @@ impl Default for FairBranchScheduler {
 }
 
 impl Scheduler for FairBranchScheduler {
-    fn schedule<'a>(&mut self, _transitions: &'a [&Transition<'a>]) -> Option<&&Transition<'a>> {
+    fn schedule<'a>(&mut self, _transitions: &'a [&Transition<'a>]) -> Option<&Transition<'a>> {
         todo!("implement schedule");
     }
 }
@@ -200,7 +200,7 @@ impl Default for SequentialBranchScheduler {
 }
 
 impl Scheduler for SequentialBranchScheduler {
-    fn schedule<'a>(&mut self, _transitions: &'a [&Transition<'a>]) -> Option<&&Transition<'a>> {
+    fn schedule<'a>(&mut self, _transitions: &'a [&Transition<'a>]) -> Option<&Transition<'a>> {
         todo!("implement schedule");
     }
 }
@@ -414,7 +414,9 @@ mod tests {
         let t2 = super::Transition::new();
 
         if let Some(t) = scheduler.schedule(&[&t1, &t2]) {
-            assert!(ptr::eq(*t, &t1) || ptr::eq(*t, &t2));
+            assert!(ptr::eq(t, &t1) || ptr::eq(t, &t2));
+        } else {
+            assert!(false, "scheduler didn't return any valid transition");
         }
     }
 }
