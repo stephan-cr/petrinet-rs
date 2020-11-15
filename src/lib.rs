@@ -4,6 +4,9 @@ use std::cell::Cell;
 use std::result;
 use std::vec::Vec;
 
+use rand::seq::SliceRandom;
+use rand::Rng;
+
 #[derive(Debug)]
 pub struct Arc<'a> {
     weight: u32,
@@ -133,28 +136,82 @@ impl<'a> Petrinet<'a> {
     }
 }
 
-pub struct RandomTransitionScheduler {}
+pub trait Scheduler {
+    fn schedule<'a>(&mut self, transitions: &'a [&Transition<'a>]) -> Option<&&Transition<'a>>;
+}
 
-impl RandomTransitionScheduler {
+/// Choose a random transition firing order.
+pub struct RandomTransitionScheduler<R: Rng> {
+    rng: R,
+}
+
+impl<R: Rng> RandomTransitionScheduler<R> {
+    pub fn new(rng: R) -> Self {
+        Self { rng }
+    }
+}
+
+impl Default for RandomTransitionScheduler<rand::rngs::ThreadRng> {
+    fn default() -> Self {
+        Self::new(rand::thread_rng())
+    }
+}
+
+impl<R: Rng> Scheduler for RandomTransitionScheduler<R> {
+    fn schedule<'a>(&mut self, transitions: &'a [&Transition<'a>]) -> Option<&&Transition<'a>> {
+        transitions.choose(&mut self.rng)
+    }
+}
+
+/// Fire transitions of parallel branches in round-robin fashion.
+pub struct FairBranchScheduler {}
+
+impl FairBranchScheduler {
     pub fn new() -> Self {
         Self {}
     }
+}
 
-    pub fn schedule(&mut self, transitions: &[Transition<'_>]) {
+impl Default for FairBranchScheduler {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Scheduler for FairBranchScheduler {
+    fn schedule<'a>(&mut self, _transitions: &'a [&Transition<'a>]) -> Option<&&Transition<'a>> {
         todo!("implement schedule");
     }
 }
 
-impl Default for RandomTransitionScheduler {
+/// Prefer one branch over the others when firing transitions.
+pub struct SequentialBranchScheduler {}
+
+impl SequentialBranchScheduler {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
+
+impl Default for SequentialBranchScheduler {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl Scheduler for SequentialBranchScheduler {
+    fn schedule<'a>(&mut self, _transitions: &'a [&Transition<'a>]) -> Option<&&Transition<'a>> {
+        todo!("implement schedule");
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rand::seq::SliceRandom;
+
+    use std::ptr;
+
+    use rand::rngs::mock::StepRng;
 
     #[test]
     fn it_works() {
@@ -266,27 +323,6 @@ mod tests {
         assert!(super::Arc::new(&place, 0).is_err());
     }
 
-    use rand::distributions::Distribution;
-
-    #[test]
-    fn test_rng() {
-        let between = rand::distributions::Uniform::new(0, 10);
-        let mut rng = rand::thread_rng();
-
-        let x = between.sample(&mut rng);
-
-        assert!(x >= 0 && x < 10);
-
-        let mut v = vec![1, 2, 3, 4];
-        v.shuffle(&mut rng);
-
-        let mut count = 0;
-        for _v in v.choose_multiple(&mut rng, v.len()) {
-            count += 1;
-        }
-        assert_eq!(4, count);
-    }
-
     #[test]
     fn test_petrinet() {
         let p1 = super::Place::new(2, "P1");
@@ -367,5 +403,18 @@ mod tests {
         petri.step();
 
         assert_eq!(3, p4.tokens());
+    }
+
+    #[test]
+    fn test_random_transition_scheduler() {
+        let rng = StepRng::new(2, 1);
+        let mut scheduler = super::RandomTransitionScheduler::<StepRng>::new(rng);
+
+        let t1 = super::Transition::new();
+        let t2 = super::Transition::new();
+
+        if let Some(t) = scheduler.schedule(&[&t1, &t2]) {
+            assert!(ptr::eq(*t, &t1) || ptr::eq(*t, &t2));
+        }
     }
 }
