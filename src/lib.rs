@@ -416,7 +416,7 @@ mod tests {
         if let Some(t) = scheduler.schedule(&[&t1, &t2]) {
             assert!(ptr::eq(t, &t1) || ptr::eq(t, &t2));
         } else {
-            assert!(false, "scheduler didn't return any valid transition");
+            panic!("scheduler didn't return any valid transition");
         }
     }
 }
