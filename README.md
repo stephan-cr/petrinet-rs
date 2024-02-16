@@ -7,7 +7,7 @@ Library for petri nets.
 
 ```toml
 [dependencies]
-sched_deadline = { git = "https://github.com/stephan-cr/petrinet-rs" }
+petrinet = { git = "https://github.com/stephan-cr/petrinet-rs" }
 ```
 
 ## License
