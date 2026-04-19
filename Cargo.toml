@@ -7,4 +7,4 @@ license = "MIT OR Apache-2.0"
 readme = "README.md"
 
 [dependencies]
-rand = "0.9.3"
+rand = "0.10"
