@@ -215,7 +215,7 @@ mod tests {
 
     use std::ptr;
 
-    use rand::rngs::mock::StepRng;
+    use rand::{rngs::SmallRng, SeedableRng};
 
     #[test]
     fn it_works() {
@@ -411,8 +411,8 @@ mod tests {
 
     #[test]
     fn test_random_transition_scheduler() {
-        let rng = StepRng::new(2, 1);
-        let mut scheduler = super::RandomTransitionScheduler::<StepRng>::new(rng);
+        let rng = SmallRng::seed_from_u64(1);
+        let mut scheduler = super::RandomTransitionScheduler::<SmallRng>::new(rng);
 
         let t1 = super::Transition::new();
         let t2 = super::Transition::new();
