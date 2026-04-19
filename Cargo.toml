@@ -2,9 +2,9 @@
 name = "petrinet"
 version = "0.1.0"
 authors = ["Stephan Creutz <stephan.cr@gmx.de>"]
-edition = "2018"
+edition = "2021"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 
 [dependencies]
-rand = "0.8"
+rand = "0.9.3"

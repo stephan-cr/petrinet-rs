@@ -4,7 +4,7 @@ use std::cell::Cell;
 use std::result;
 use std::vec::Vec;
 
-use rand::seq::SliceRandom;
+use rand::seq::IndexedRandom;
 use rand::Rng;
 
 #[derive(Debug)]
@@ -14,9 +14,9 @@ pub struct Arc<'a> {
 }
 
 impl<'a> Arc<'a> {
-    pub fn new(place: &'a Place, weight: u32) -> result::Result<Self, &str> {
+    pub fn new(place: &'a Place, weight: u32) -> result::Result<Self, String> {
         if weight < 1 {
-            Err("weight must be greater 0")
+            Err("weight must be greater 0".to_string())
         } else {
             Ok(Self { weight, place })
         }
@@ -47,6 +47,10 @@ impl Place {
             tokens: Cell::new(tokens),
             name: name.to_string(),
         }
+    }
+
+    pub fn name(&self) -> String {
+        self.name.clone()
     }
 
     pub fn tokens(&self) -> u32 {
@@ -153,7 +157,7 @@ impl<R: Rng> RandomTransitionScheduler<R> {
 
 impl Default for RandomTransitionScheduler<rand::rngs::ThreadRng> {
     fn default() -> Self {
-        Self::new(rand::thread_rng())
+        Self::new(rand::rng())
     }
 }
 
